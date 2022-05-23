@@ -9,14 +9,22 @@ describe('effect', () => {
       name: 'vlou'
     })
 
+    const user2 = reactive({
+      age: 10,
+      name: 'vlou'
+    })
+
     let nextAge;
+    let nextAge2;
     let name;
     effect(()=>{
       nextAge = user.age + 1
       name = user.name
+      nextAge2 = user2.age + 1
     })
 
     expect(nextAge).toBe(11)
+    expect(nextAge2).toBe(56)
     expect(name).toBe('vlou')
     
     user.age++

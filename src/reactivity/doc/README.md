@@ -4,7 +4,7 @@
  * @Author: VLOU
  * @Date: 2022-05-22 18:03:56
  * @LastEditors: VLOU
- * @LastEditTime: 2022-05-22 18:25:31
+ * @LastEditTime: 2022-05-24 00:44:54
 -->
 ### 整体实现effect数据更新（浅更新）
 
@@ -16,3 +16,4 @@
 3.当proxy值发生变化后会执行effect
 
 
+// 补充new proxy 一个对象后会是一个新的引用地址，而map得get是通过对象的引用地址获取？
