@@ -1,7 +1,8 @@
 
 class ReactiveEffect {
   private _fn: any;
-  constructor(fn) {
+  // 这里加public为了外部能够直接使用,也就是effect.scheduler
+  constructor(fn, public scheduler?) {
     this._fn = fn
   }
 
@@ -39,16 +40,24 @@ export function TriggerEvent(target, key) {
   const depsMap = targetMap.get(target)
   const dep = depsMap.get(key)
 
-  for (const reactiveEffect of dep) {
-    reactiveEffect.run()
+  for (const effect of dep) {
+    if (effect.scheduler) {
+      effect.scheduler()
+    } else {
+      effect.run()
+    }
   }
 }
 
 
-export function effect(fn) {
-  const _effect = new ReactiveEffect(fn)
+export function effect(fn, options: any = {}) {
+
+  // 初始化schedule函数
+  const scheduler = options?.scheduler
+  const _effect = new ReactiveEffect(fn, scheduler)
 
   _effect.run()
 
-  return _effect.run.bind(_effect)
+  const runner = _effect.run.bind(_effect)
+  return runner
 }
