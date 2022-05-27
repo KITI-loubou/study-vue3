@@ -5,7 +5,7 @@ import { effect } from '../effect'
 import { reactive } from '../reactive';
 
 describe('effect', () => {
-  it('runner', () => {
+  it.skip('runner', () => {
     let foo = 10;
     const runner = effect(() => {
       foo++;
@@ -18,7 +18,7 @@ describe('effect', () => {
     expect(r).toBe('foo')
   })
 
-  it('scheduler', () => {
+  it.skip('scheduler', () => {
     let dummy;
     let run: any;
     const scheduler = jest.fn(() => {

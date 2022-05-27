@@ -17,7 +17,7 @@ const targetMap = new Map()
 // 当前执行的ReactiveEffect
 let activeEffect;
 
-// 收集依赖
+// 5.收集依赖
 export function TrackEvent(target, key) {
   //一个目标对象target对应一个key,一个key对应一个容器dep
   let depsMap = targetMap.get(target)
@@ -35,7 +35,7 @@ export function TrackEvent(target, key) {
   dep.add(activeEffect)
 }
 
-// 触发依赖
+// 7.触发依赖
 export function TriggerEvent(target, key) {
   const depsMap = targetMap.get(target)
   const dep = depsMap.get(key)
@@ -44,6 +44,7 @@ export function TriggerEvent(target, key) {
     if (effect.scheduler) {
       effect.scheduler()
     } else {
+      // 8.执行effect作用域函数更新数据
       effect.run()
     }
   }
