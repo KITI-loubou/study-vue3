@@ -1,4 +1,3 @@
-
 class ReactiveEffect {
   private _fn: any;
   // 这里加public为了外部能够直接使用,也就是effect.scheduler
@@ -15,7 +14,7 @@ class ReactiveEffect {
 // 构建容器收集依赖
 const targetMap = new Map()
 // 当前执行的ReactiveEffect
-let activeEffect;
+let activeEffect: ReactiveEffect | undefined;
 
 // 5.收集依赖
 export function TrackEvent(target, key) {
@@ -41,11 +40,13 @@ export function TriggerEvent(target, key) {
   const dep = depsMap.get(key)
 
   for (const effect of dep) {
-    if (effect.scheduler) {
-      effect.scheduler()
-    } else {
-      // 8.执行effect作用域函数更新数据
-      effect.run()
+    if (activeEffect !== effect) { // 修复死循环，在当前作用域内就不在触发
+      if (effect.scheduler) {
+        effect.scheduler()
+      } else {
+        // 8.执行effect作用域函数更新数据
+        effect.run()
+      }
     }
   }
 }
