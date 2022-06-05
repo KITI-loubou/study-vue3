@@ -1,13 +1,30 @@
+import { extend } from '../shared/index'
+
 class ReactiveEffect {
   private _fn: any;
+  onStop?: () => void;
+  active = true; // 防止多次调用stop带来性能问题
+  deps: any[] = []; // dep也就是存收集起来的effect，它是Set
   // 这里加public为了外部能够直接使用,也就是effect.scheduler
-  constructor(fn, public scheduler?) {
+  public scheduler: Function | undefined;
+  constructor(fn, scheduler?: Function) {
     this._fn = fn
+    this.scheduler = scheduler
   }
 
   run() {
     activeEffect = this
     return this._fn()
+  }
+
+  stop() {
+    if (this.active) {
+      cleanupEffect(this)
+      if (this.onStop) {
+        this.onStop()
+      }
+      this.active = false
+    }
   }
 }
 
@@ -31,7 +48,10 @@ export function TrackEvent(target, key) {
     depsMap.set(key, dep)
   }
 
+  if (!activeEffect) return;
+
   dep.add(activeEffect)
+  activeEffect.deps.push(dep)
 }
 
 // 7.触发依赖
@@ -40,17 +60,27 @@ export function TriggerEvent(target, key) {
   const dep = depsMap.get(key)
 
   for (const effect of dep) {
-    if (activeEffect !== effect) { // 修复死循环，在当前作用域内就不在触发
-      if (effect.scheduler) {
-        effect.scheduler()
-      } else {
-        // 8.执行effect作用域函数更新数据
-        effect.run()
-      }
+    // if (activeEffect !== effect) { // 修复死循环，在当前作用域内就不在触发
+    if (effect.scheduler) {
+      effect.scheduler()
+    } else {
+      // 8.执行effect作用域函数更新数据
+      effect.run()
     }
+    // }
   }
 }
 
+// 清除effect
+export function cleanupEffect(effect) {
+  effect.deps.forEach(dep => {
+    dep.delete(effect)
+  })
+}
+
+export function stop(runner) {
+  runner.effect.stop()
+}
 
 export function effect(fn, options: any = {}) {
 
@@ -58,8 +88,11 @@ export function effect(fn, options: any = {}) {
   const scheduler = options?.scheduler
   const _effect = new ReactiveEffect(fn, scheduler)
 
+  extend(_effect, options)
+
   _effect.run()
 
-  const runner = _effect.run.bind(_effect)
+  const runner: any = _effect.run.bind(_effect)
+  runner.effect = _effect
   return runner
 }
