@@ -13,6 +13,10 @@ describe('readonly', () => {
   })
 
   it('readonly warn', () => {
-    
+    console.warn = jest.fn()
+    const user = readonly({age:1})
+    user.age++
+
+    expect(console.warn).toBeCalled()
   })
 })
