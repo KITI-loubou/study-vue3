@@ -60,12 +60,12 @@ describe('effect', () => {
     expect(dummy).toBe(5)
   })
 
-  it('onStop', () => {
+  it.skip('onStop', () => {
     const obj = reactive({
       foo: 1
     })
 
-    const onStop = jest.fn(()=>{
+    const onStop = jest.fn(() => {
       console.log('执行onStop')
     })
     let dummy;
