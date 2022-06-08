@@ -2,7 +2,7 @@
  * @Author: VLOU
  */
 
-import { readonly } from "../reactive"
+import { readonly, isReadonly } from "../reactive"
 
 describe('readonly', () => {
   it('happy path', () => {
@@ -10,6 +10,8 @@ describe('readonly', () => {
     const wrapped = readonly(origin)
     expect(wrapped).not.toBe(origin)
     expect(wrapped.foo).toBe(1)
+    expect(isReadonly(wrapped)).toBe(true)
+    expect(isReadonly(origin)).toBe(false)
   })
 
   it('readonly warn', () => {
