@@ -1,5 +1,13 @@
 import { extend } from '../shared/index'
 
+
+// 构建容器收集依赖
+const targetMap = new Map()
+// 当前执行的ReactiveEffect
+let activeEffect: ReactiveEffect | undefined;
+let shouldTrack: boolean;
+let isRun:boolean;
+
 class ReactiveEffect {
   private _fn: any;
   onStop?: () => void;
@@ -13,8 +21,24 @@ class ReactiveEffect {
   }
 
   run() {
+    let result;
+    // 判断当前时候在执行作用域函数
+    isRun = true
+    if (!this.active) {
+      result = this._fn()
+      isRun = false
+      return result
+    }
+
     activeEffect = this
-    return this._fn()
+    shouldTrack = true
+
+    result = this._fn()
+
+    shouldTrack = false
+    isRun = false
+
+    return result
   }
 
   stop() {
@@ -28,13 +52,9 @@ class ReactiveEffect {
   }
 }
 
-// 构建容器收集依赖
-const targetMap = new Map()
-// 当前执行的ReactiveEffect
-let activeEffect: ReactiveEffect | undefined;
-
 // 5.收集依赖
 export function TrackEvent(target, key) {
+  if (!activeEffect || !shouldTrack) return;
   //一个目标对象target对应一个key,一个key对应一个容器dep
   let depsMap = targetMap.get(target)
   if (!depsMap) {
@@ -47,9 +67,7 @@ export function TrackEvent(target, key) {
     dep = new Set()
     depsMap.set(key, dep)
   }
-
-  if (!activeEffect) return;
-
+  if (dep.has(activeEffect)) return
   dep.add(activeEffect)
   activeEffect.deps.push(dep)
 }
@@ -60,14 +78,14 @@ export function TriggerEvent(target, key) {
   const dep = depsMap.get(key)
 
   for (const effect of dep) {
-    // if (activeEffect !== effect) { // 修复死循环，在当前作用域内就不在触发
+    if (!isRun) { // 修复死循环，在当前作用域内就不在触发
     if (effect.scheduler) {
       effect.scheduler()
     } else {
       // 8.执行effect作用域函数更新数据
       effect.run()
     }
-    // }
+    }
   }
 }
 

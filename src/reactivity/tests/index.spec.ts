@@ -24,7 +24,7 @@ describe('reactivity', () => {
       nextAge = user.age + 1
       name = user.name
       // 这里设值后会触发set又重新执行ReactiveEffect造成死循环
-      // user.age = nextAge
+      user.age = nextAge
       // nextAge2 = user2.age + 1
     })
 
@@ -34,11 +34,11 @@ describe('reactivity', () => {
     
     // 6.触发proxy的get方法再触发set方法
     user.age = user.age + 1
-    user.age++
+    // user.age++
     
     user.name = '皮皮'
     
-    expect(nextAge).toBe(13)
+    expect(nextAge).toBe(14)
     expect(name).toBe('皮皮')
   })
 })

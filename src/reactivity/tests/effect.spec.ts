@@ -41,7 +41,7 @@ describe('effect', () => {
     expect(dummy).toBe(2)
   })
 
-  it.skip('stop', () => {
+  it('stop', () => {
     let dummy;
     const obj = reactive({
       props: 1
@@ -54,7 +54,7 @@ describe('effect', () => {
     obj.props = 3
     expect(dummy).toBe(4)
     stop(runner)
-    obj.props = 4
+    obj.props++
     expect(dummy).toBe(4)
     runner()
     expect(dummy).toBe(5)
